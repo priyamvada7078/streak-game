@@ -1,32 +1,38 @@
-function Header({ username, streak, onLogout }) {
-  const initial = username ? username.charAt(0).toUpperCase() : "?";
+import { FlameIcon } from "./icons";
+import ProfileDropdown from "./ProfileDropdown";
 
+function Header({
+  username,
+  streak,
+  lastPlayedDate,
+  playingSince,
+  lastResult,
+  onLogout,
+}) {
   return (
     <header className="header">
-      <div className="header-logo">STREAK 🔥</div>
+      <div className="header-logo">
+        STREAK <FlameIcon size={16} />
+      </div>
 
       <div className="profile-section">
         <div className="streak-mini">
-          <span>🔥</span>
+          <FlameIcon size={16} />
+
           <div>
             <small>Current streak</small>
-            <strong>{streak || 0}</strong>
+            <strong>{streak ?? 0}</strong>
           </div>
         </div>
 
-        <div className="profile">
-          <div className="avatar">{initial}</div>
-
-          <span className="profile-name">{username}</span>
-
-          <button
-            className="logout-button"
-            onClick={onLogout}
-            type="button"
-          >
-            Switch player
-          </button>
-        </div>
+        <ProfileDropdown
+          username={username}
+          streak={streak}
+          lastPlayedDate={lastPlayedDate}
+          playingSince={playingSince}
+          lastResult={lastResult}
+          onLogout={onLogout}
+        />
       </div>
     </header>
   );

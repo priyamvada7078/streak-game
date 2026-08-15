@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import "./index.css";
 import { getPuzzle, getPlayer, submitGuess } from "./services/api";
 import LoadingScreen from "./components/LoadingScreen";
@@ -21,9 +21,6 @@ function App() {
   const [playerData, setPlayerData] = useState(null);
   const [initializing, setInitializing] = useState(true);
   const [error, setError] = useState("");
-  const [profileOpen, setProfileOpen] = useState(false);
-
-  const profileRef = useRef(null);
 
   useEffect(() => {
     const loadGame = async () => {
@@ -31,28 +28,28 @@ function App() {
       setError("");
 
       try {
-  const puzzleData = await getPuzzle();
-  setPuzzle(puzzleData);
+        const puzzleData = await getPuzzle();
+        setPuzzle(puzzleData);
 
-  const storedUsername = localStorage.getItem("streak_username");
+        const storedUsername = localStorage.getItem("streak_username");
 
-  if (storedUsername) {
-    const player = await getPlayer(storedUsername);
+        if (storedUsername) {
+          const player = await getPlayer(storedUsername);
 
-    if (player) {
-      setPlayerData(player);
+          if (player) {
+            setPlayerData(player);
 
-      if (player.lastPlayedDate === puzzleData.date) {
-        setResult({
-          correct: player.lastResult === "correct",
-          streak: player.streak,
-          alreadyPlayed: true,
-          message: "You've already played today's challenge.",
-        });
-      }
-    }
-  }
-} catch {
+            if (player.lastPlayedDate === puzzleData.date) {
+              setResult({
+                correct: player.lastResult === "correct",
+                streak: player.streak,
+                alreadyPlayed: true,
+                message: "You've already played today's challenge.",
+              });
+            }
+          }
+        }
+      } catch {
         setError(
           "We couldn't reach the game server. Check your connection and try again.",
         );
@@ -63,20 +60,6 @@ function App() {
 
     loadGame();
   }, []);
-
-  // Close the profile dropdown on outside click.
-  useEffect(() => {
-    if (!profileOpen) return;
-
-    const handleClick = (e) => {
-      if (profileRef.current && !profileRef.current.contains(e.target)) {
-        setProfileOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [profileOpen]);
 
   const saveUsername = () => {
     const trimmedName = username.trim();
@@ -92,28 +75,28 @@ function App() {
   };
 
   const fetchPlayer = async (name) => {
-  try {
-    const data = await getPlayer(name);
+    try {
+      const data = await getPlayer(name);
 
-    if (!data) {
-      setPlayerData(null);
-      return;
+      if (!data) {
+        setPlayerData(null);
+        return;
+      }
+
+      setPlayerData(data);
+
+      if (puzzle && data.lastPlayedDate === puzzle.date) {
+        setResult({
+          correct: data.lastResult === "correct",
+          streak: data.streak,
+          alreadyPlayed: true,
+          message: "You've already played today's challenge.",
+        });
+      }
+    } catch {
+      console.error("Failed to fetch player data");
     }
-
-    setPlayerData(data);
-
-    if (puzzle && data.lastPlayedDate === puzzle.date) {
-      setResult({
-        correct: data.lastResult === "correct",
-        streak: data.streak,
-        alreadyPlayed: true,
-        message: "You've already played today's challenge.",
-      });
-    }
-  } catch {
-    console.error("Failed to fetch player data");
-  }
-};
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("streak_username");
@@ -123,7 +106,6 @@ function App() {
     setGuess(null);
     setPlayerData(null);
     setError("");
-    setProfileOpen(false);
   };
 
   const handleGuess = async (number) => {
@@ -134,18 +116,18 @@ function App() {
     setError("");
 
     try {
-  const data = await submitGuess(savedUsername, number);
+      const data = await submitGuess(savedUsername, number);
 
-  setResult(data);
+      setResult(data);
 
-  setPlayerData((prev) => ({
-    username: savedUsername,
-    streak: data.streak,
-    lastPlayedDate: puzzle.date,
-    lastResult: data.correct ? "correct" : "wrong",
-    firstPlayedDate: prev?.firstPlayedDate || puzzle.date,
-  }));
-} catch {
+      setPlayerData((prev) => ({
+        username: savedUsername,
+        streak: data.streak,
+        lastPlayedDate: puzzle.date,
+        lastResult: data.correct ? "correct" : "wrong",
+        firstPlayedDate: prev?.firstPlayedDate || puzzle.date,
+      }));
+    } catch {
       setGuess(null);
       setError("Your guess didn't go through. Please try again.");
     } finally {
@@ -155,65 +137,68 @@ function App() {
 
   const streakValue = playerData?.streak ?? result?.streak ?? 0;
 
- if (initializing) {
-  return <LoadingScreen />;
-}
+  if (initializing) {
+    return <LoadingScreen />;
+  }
 
-if (!puzzle) {
-  return (
-    <div className="status-screen">
-      <div className="status-card">
-        <div className="brand-mark">STREAK</div>
+  if (!puzzle) {
+    return (
+      <div className="status-screen">
+        <div className="status-card">
+          <div className="brand-mark">STREAK</div>
 
-        <p className="error-text">
-          {error || "Something went wrong loading the game."}
-        </p>
+          <p className="error-text">
+            {error || "Something went wrong loading the game."}
+          </p>
 
-        <button
-          className="btn-primary"
-          onClick={() => window.location.reload()}
-        >
-          Try again
-        </button>
+          <button
+            className="btn-primary"
+            onClick={() => window.location.reload()}
+          >
+            Try again
+          </button>
+        </div>
       </div>
+    );
+  }
+
+  if (!savedUsername) {
+    return (
+      <WelcomeScreen
+        username={username}
+        setUsername={setUsername}
+        onContinue={saveUsername}
+      />
+    );
+  }
+
+  return (
+    <div className="app">
+      <Header
+        username={savedUsername}
+        streak={streakValue}
+        lastPlayedDate={playerData?.lastPlayedDate}
+        playingSince={playerData?.firstPlayedDate}
+        lastResult={playerData?.lastResult}
+        onLogout={handleLogout}
+      />
+
+      {error && <div className="error-banner">{error}</div>}
+
+      {result ? (
+        <ResultCard result={result} />
+      ) : (
+        <GameBoard
+          username={savedUsername}
+          puzzle={puzzle}
+          guess={guess}
+          loading={loading}
+          streak={streakValue}
+          onGuess={handleGuess}
+        />
+      )}
     </div>
   );
-}
-
-if (!savedUsername) {
-  return (
-    <WelcomeScreen
-      username={username}
-      setUsername={setUsername}
-      onContinue={saveUsername}
-    />
-  );
-}
-
-return (
-  <div className="app">
-    <Header
-      username={savedUsername}
-      streak={streakValue}
-      onLogout={handleLogout}
-    />
-
-    {error && <div className="error-banner">{error}</div>}
-
-    {result ? (
-      <ResultCard result={result} />
-    ) : (
-      <GameBoard
-        username={savedUsername}
-        puzzle={puzzle}
-        guess={guess}
-        loading={loading}
-        streak={streakValue}
-        onGuess={handleGuess}
-      />
-    )}
-  </div>
-);
 }
 
 export default App;

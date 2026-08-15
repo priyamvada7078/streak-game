@@ -1,10 +1,10 @@
+import { FlameIcon } from "./icons";
+
 function ResultCard({ result }) {
   const isAlreadyPlayed = result.alreadyPlayed;
   const isCorrect = result.correct;
 
-  // eslint-disable-next-line no-useless-assignment
-  let title = "";
-  let message = result.message;
+  let title;
 
   if (isAlreadyPlayed) {
     title = "You've already played today! 👋";
@@ -16,7 +16,15 @@ function ResultCard({ result }) {
 
   return (
     <main className="game-page">
-      <section className={`game-card result-card ${isCorrect ? "correct" : "wrong"}`}>
+      <section
+        className={`game-card result-card ${
+          isAlreadyPlayed
+            ? "already-played"
+            : isCorrect
+            ? "correct"
+            : "wrong"
+        }`}
+      >
         <div className="game-content">
           <p className="eyebrow">
             {isAlreadyPlayed ? "TODAY'S CHALLENGE COMPLETE" : "RESULT"}
@@ -24,7 +32,7 @@ function ResultCard({ result }) {
 
           <h1>{title}</h1>
 
-          <p className="result-message">{message}</p>
+          <p className="result-message">{result.message}</p>
 
           {!isAlreadyPlayed && result.answer !== undefined && (
             <div className="answer-box">
@@ -34,7 +42,8 @@ function ResultCard({ result }) {
           )}
 
           <div className="result-streak">
-            <span>🔥</span>
+            <FlameIcon size={20} />
+
             <div>
               <small>Current streak</small>
               <strong>{result.streak || 0} days</strong>
