@@ -92,6 +92,20 @@ Frontend: https://streak-game-p078.vercel.app/
 Backend: https://streak-game-txro.onrender.com
 ---
 
+## AI Usage
+
+AI tools were used as part of the development process to assist with:
+
+* Brainstorming and refining the UI/UX design.
+* Improving CSS styling and responsiveness.
+* Reviewing component structure and suggesting code improvements.
+* Debugging frontend and backend issues during development.
+* Getting help with deployment configuration and troubleshooting.
+* Assisting with documentation and README preparation.
+
+The core project implementation, integration, testing, and deployment were completed and verified by me. AI was used as a development assistant to speed up the workflow and help solve issues, similar to how AI tools are used in a real development environment.
+
+
 ## Project Structure
 
 ```text
