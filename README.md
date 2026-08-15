@@ -87,6 +87,8 @@ Players cannot submit another guess after completing the challenge for the day.
 - Database: MongoDB
 
 Frontend: https://streak-game-p078.vercel.app/
+
+
 Backend: https://streak-game-txro.onrender.com
 ---
 
